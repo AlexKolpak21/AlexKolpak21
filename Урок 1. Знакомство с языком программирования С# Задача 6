@@ -1,0 +1,23 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        CheckEvenOdd(4);
+        CheckEvenOdd(-3);
+        CheckEvenOdd(7);
+    }
+
+    static void CheckEvenOdd(int number)
+    {
+        if (number % 2 == 0)
+        {
+            Console.WriteLine($"{number} -> да");
+        }
+        else
+        {
+            Console.WriteLine($"{number} -> нет");
+        }
+    }
+}
