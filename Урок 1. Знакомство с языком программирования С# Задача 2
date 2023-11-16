@@ -1,0 +1,29 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        CompareNumbers(5, 7);
+        CompareNumbers(2, 10);
+        CompareNumbers(-9, -3);
+    }
+
+    static void CompareNumbers(int a, int b)
+    {
+        int maximum, minimum;
+
+        if (a > b)
+        {
+            maximum = a;
+            minimum = b;
+        }
+        else
+        {
+            maximum = b;
+            minimum = a;
+        }
+
+        Console.WriteLine($"a = {a}; b = {b} -> max = {maximum}; min = {minimum}");
+    }
+}
