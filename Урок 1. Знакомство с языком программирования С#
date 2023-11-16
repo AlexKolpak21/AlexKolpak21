@@ -1,0 +1,28 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        FindMaximum(2, 3, 7);
+        FindMaximum(44, 5, 78);
+        FindMaximum(22, 3, 9);
+    }
+
+    static void FindMaximum(int a, int b, int c)
+    {
+        int maximum = a;
+
+        if (b > maximum)
+        {
+            maximum = b;
+        }
+
+        if (c > maximum)
+        {
+            maximum = c;
+        }
+
+        Console.WriteLine($"{a}, {b}, {c} -> {maximum}");
+    }
+}
