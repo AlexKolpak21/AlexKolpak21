@@ -1,0 +1,156 @@
+1)Переписать код в соответствии с Single Responsibility Principle:
+import java.util.Date;
+// Класс, представляющий сущность "Сотрудник"
+public class Employee {
+    private String name;
+    private Date dob;
+    private int baseSalary;
+
+    public Employee(String name, Date dob, int baseSalary) {
+        this.name = name;
+        this.dob = dob;
+        this.baseSalary = baseSalary;
+    }
+
+    public String getEmpInfo() {
+        return "name - " + name + " , dob - " + dob.toString();
+    }
+
+    // Геттер для получения базовой заработной платы
+    public int getBaseSalary() {
+        return baseSalary;
+    }
+
+    // Внутренний класс, отвечающий за расчет заработной платы
+    public class SalaryCalculator {
+        // Метод для расчета чистой заработной платы сотрудника
+        public int calculateNetSalary() {
+            int tax = (int) (baseSalary * 0.25); // Например, расчет налога может быть пересмотрен
+            return baseSalary - tax;
+        }
+    }
+}
+2) Переписать код SpeedCalculation в соответствии с Open-Closed Principle:
+// Базовый класс транспортного средства
+class Vehicle {
+    int maxSpeed;
+    String type;
+
+    public Vehicle(int maxSpeed, String type) {
+        this.maxSpeed = maxSpeed;
+        this.type = type;
+    }
+
+    public int getMaxSpeed() {
+        return this.maxSpeed;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+    
+    // Метод, который будет переопределяться в подклассах
+    public double calculateAllowedSpeed() {
+        return 0.0;
+    }
+}
+
+// Подкласс для автомобиля
+class Car extends Vehicle {
+    public Car(int maxSpeed, String type) {
+        super(maxSpeed, type);
+    }
+
+    @Override
+    public double calculateAllowedSpeed() {
+        return getMaxSpeed() * 0.8;
+    }
+}
+
+// Подкласс для автобуса
+class Bus extends Vehicle {
+    public Bus(int maxSpeed, String type) {
+        super(maxSpeed, type);
+    }
+
+    @Override
+    public double calculateAllowedSpeed() {
+        return getMaxSpeed() * 0.6;
+    }
+}
+
+// Класс SpeedCalculation
+public class SpeedCalculation {
+    public double calculateAllowedSpeed(Vehicle vehicle) {
+        return vehicle.calculateAllowedSpeed();
+    }
+}
+3) Переписать код в соответствии с Interface Segregation Principle:
+public interface Shape {
+    double area();
+}
+
+public class Circle implements Shape {
+    private double radius;
+
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public double area() {
+        return 2 * Math.PI * radius; // Используем Math.PI для точности числа π
+    }
+}
+
+public class Cube implements Shape {
+    private int edge;
+
+    public Cube(int edge) {
+        this.edge = edge;
+    }
+
+    @Override
+    public double area() {
+        return 6 * edge * edge;
+    }
+
+    public double volume() {
+        return edge * edge * edge;
+    }
+}
+4) Переписать код в соответствии с Liskov Substitution Principle:
+public class Shape {
+    protected int width;
+    protected int height;
+
+    public int area() {
+        return this.width * this.height;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+}
+
+public class Rectangle extends Shape {
+    // Конструктор и методы остаются без изменений
+}
+
+public class Square extends Shape {
+    @Override
+    public void setWidth(int width) {
+        this.width = width;
+        this.height = width;
+    }
+
+    @Override
+    public void setHeight(int height) {
+        this.height = height;
+        this.width = height;
+    }
+}
