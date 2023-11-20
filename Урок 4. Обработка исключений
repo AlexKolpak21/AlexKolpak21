@@ -1,0 +1,112 @@
+1)
+class InsufficientFundsException extends Exception {
+    InsufficientFundsException(String message) {
+        super(message);
+    }
+}
+
+class Account {
+    private double balance;
+
+    Account(double initialBalance) {
+        if (initialBalance < 0) {
+            throw new IllegalArgumentException("Начальный баланс не может быть отрицательным.");
+        }
+        this.balance = initialBalance;
+    }
+
+    void deposit(double amount) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("Сумма депозита не может быть отрицательной.");
+        }
+        this.balance += amount;
+        System.out.println("Депозит в размере " + amount + " прошел успешно.");
+    }
+
+    void withdraw(double amount) throws InsufficientFundsException {
+        if (amount > balance) {
+            throw new InsufficientFundsException("Недостаточно средств на счете. Текущий баланс: " + balance);
+        }
+        this.balance -= amount;
+        System.out.println("Снятие средств в размере " + amount + " прошло успешно.");
+    }
+
+    double getBalance() {
+        return balance;
+    }
+}
+
+public class BankAccountDemo {
+    public static void main(String[] args) {
+        try {
+            Account account = new Account(1000); // Начальный баланс
+
+            account.deposit(500); // Депозит
+            account.withdraw(200); // Снятие
+
+            // Попытка снятия больше, чем есть на счете
+            account.withdraw(1500);
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        } catch (InsufficientFundsException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+    }
+}
+2)
+class InsufficientFundsException extends Exception {
+    InsufficientFundsException(String message) {
+        super(message);
+    }
+}
+
+class Account {
+    private double balance;
+
+    Account(double initialBalance) {
+        if (initialBalance < 0) {
+            throw new IllegalArgumentException("Начальный баланс не может быть отрицательным.");
+        }
+        this.balance = initialBalance;
+    }
+
+    void deposit(double amount) {
+        if (amount < 0) {
+            throw new IllegalArgumentException("Сумма депозита не может быть отрицательной.");
+        }
+        this.balance += amount;
+        System.out.println("Депозит в размере " + amount + " прошел успешно.");
+    }
+
+    void withdraw(double amount) throws InsufficientFundsException {
+        if (amount > balance) {
+            throw new InsufficientFundsException("Недостаточно средств на счете. Текущий баланс: " + balance);
+        }
+        this.balance -= amount;
+        System.out.println("Снятие средств в размере " + amount + " прошло успешно.");
+    }
+
+    double getBalance() {
+        return balance;
+    }
+}
+
+public class BankAccountDemo {
+    public static void main(String[] args) {
+        try {
+            Account account = new Account(1000); // Начальный баланс
+
+            account.deposit(500); // Депозит
+            account.withdraw(200); // Снятие
+
+            // Попытка снятия больше, чем есть на счете
+            account.withdraw(1500);
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        } catch (InsufficientFundsException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        }
+    }
+}
