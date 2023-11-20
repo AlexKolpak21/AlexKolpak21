@@ -1,0 +1,100 @@
+1)
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class BackupFiles {
+    public static void backupDirectory(String sourceDir) {
+        // Создание папки для резервных копий
+        String backupFolderName = "./backup/" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+        File backupFolder = new File(backupFolderName);
+        if (!backupFolder.exists()) {
+            backupFolder.mkdirs();
+        }
+
+        File sourceDirectory = new File(sourceDir);
+        if (sourceDirectory.isDirectory()) {
+            File[] files = sourceDirectory.listFiles();
+
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile()) {
+                        // Создание пути для сохранения резервной копии
+                        Path sourceFile = file.toPath();
+                        Path destinationFile = new File(backupFolder, file.getName()).toPath();
+
+                        try {
+                            // Копирование файла в папку резервных копий
+                            Files.copy(sourceFile, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+                            System.out.println("Создана резервная копия файла: " + sourceFile + " -> " + destinationFile);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        // Укажите путь к директории, файлы которой вы хотите скопировать
+        String sourceDirectory = "/путь/к/вашей/директории";
+
+        // Создание резервных копий файлов
+        backupDirectory(sourceDirectory);
+    }
+}
+  2)
+import java.io.File;
+
+public class Tree {
+    private String rootDir;
+
+    public Tree(String rootDir) {
+        this.rootDir = rootDir;
+    }
+
+    private void generateTree(String path, int depth) {
+        File file = new File(path);
+        String[] contents = file.list();
+
+        if (contents != null) {
+            for (String content : contents) {
+                File currentFile = new File(file, content);
+                if (depth == 0) {
+                    System.out.println(currentFile.getPath());
+                } else {
+                    StringBuilder indent = new StringBuilder("|   ".repeat(depth - 1) + "|-- ");
+                    System.out.println(indent.toString() + currentFile.getName());
+                }
+
+                if (currentFile.isDirectory()) {
+                    generateTree(currentFile.getPath(), depth + 1);
+                }
+            }
+        }
+    }
+
+    public void print() {
+        File root = new File(rootDir);
+
+        if (!root.exists() || !root.isDirectory()) {
+            System.out.println("Directory '" + rootDir + "' does not exist.");
+            return;
+        }
+
+        System.out.println("Directory Tree:");
+        generateTree(rootDir, 0);
+    }
+
+    public static void main(String[] args) {
+        String directoryPath = "/path/to/your/directory"; // Укажите путь к вашей корневой директории
+        Tree tree = new Tree(directoryPath);
+        tree.print();
+    }
+}
+                      
