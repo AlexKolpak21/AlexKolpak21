@@ -1,0 +1,81 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+
+// Базовый класс Worker
+abstract class Worker {
+    String name;
+
+    Worker(String name) {
+        this.name = name;
+    }
+
+    abstract double calculateMonthlySalary();
+}
+
+// Потомок класса Worker - HourlyEmployee (почасовая оплата)
+class HourlyEmployee extends Worker {
+    double hourlyRate;
+
+    HourlyEmployee(String name, double hourlyRate) {
+        super(name);
+        this.hourlyRate = hourlyRate;
+    }
+
+    @Override
+    double calculateMonthlySalary() {
+        return 20.8 * 8 * hourlyRate;
+    }
+}
+
+// Потомок класса Worker - FixedSalaryEmployee (фиксированная оплата)
+class FixedSalaryEmployee extends Worker {
+    double monthlySalary;
+
+    FixedSalaryEmployee(String name, double monthlySalary) {
+        super(name);
+        this.monthlySalary = monthlySalary;
+    }
+
+    @Override
+    double calculateMonthlySalary() {
+        return monthlySalary;
+    }
+}
+
+// Класс, содержащий массив сотрудников и реализующий интерфейс Iterable
+class EmployeeCollection implements Iterable<Worker> {
+    ArrayList<Worker> workers;
+
+    EmployeeCollection(ArrayList<Worker> workers) {
+        this.workers = workers;
+    }
+
+    @Override
+    public Iterator<Worker> iterator() {
+        return workers.iterator();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        ArrayList<Worker> workers = new ArrayList<>();
+        workers.add(new HourlyEmployee("Иван", 15));
+        workers.add(new FixedSalaryEmployee("Петр", 3000));
+        workers.add(new HourlyEmployee("Мария", 20));
+        workers.add(new FixedSalaryEmployee("Анна", 4000));
+
+        // Пример использования интерфейсов сортировки
+        Collections.sort(workers, Comparator.comparing(Worker::calculateMonthlySalary));
+        for (Worker worker : workers) {
+            System.out.println("Name: " + worker.name + ", Monthly Salary: " + worker.calculateMonthlySalary());
+        }
+
+        // Пример использования класса EmployeeCollection с использованием foreach
+        EmployeeCollection employeeCollection = new EmployeeCollection(workers);
+        for (Worker worker : employeeCollection) {
+            System.out.println("Name: " + worker.name + ", Monthly Salary: " + worker.calculateMonthlySalary());
+        }
+    }
+}
