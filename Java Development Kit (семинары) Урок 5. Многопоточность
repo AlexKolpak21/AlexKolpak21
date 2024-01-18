@@ -1,0 +1,96 @@
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+class Philosopher extends Thread {
+    private final Lock leftFork;
+    private final Lock rightFork;
+    private int eatCount;
+
+    public Philosopher(String name, Lock leftFork, Lock rightFork) {
+        super(name);
+        this.leftFork = leftFork;
+        this.rightFork = rightFork;
+        this.eatCount = 0;
+    }
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 3; i++) {
+            think();
+            dine();
+        }
+    }
+
+    private void think() {
+        System.out.println(getName() + " is thinking.");
+        try {
+            Thread.sleep((long) (Math.random() * 1000));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void dine() {
+        while (true) {
+            leftFork.lock();
+            boolean rightForkLocked = rightFork.tryLock();
+
+            if (rightForkLocked) {
+                break; // Both forks are acquired
+            } else {
+                leftFork.unlock();
+                System.out.println(getName() + " released the right fork.");
+            }
+        }
+
+        System.out.println(getName() + " is eating.");
+        eatCount++;
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        leftFork.unlock();
+        rightFork.unlock();
+        System.out.println(getName() + " released both forks.");
+    }
+
+    public int getEatCount() {
+        return eatCount;
+    }
+}
+
+public class DiningPhilosophers {
+    public static void main(String[] args) {
+        Lock fork1 = new ReentrantLock();
+        Lock fork2 = new ReentrantLock();
+        Lock fork3 = new ReentrantLock();
+        Lock fork4 = new ReentrantLock();
+        Lock fork5 = new ReentrantLock();
+
+        Philosopher[] philosophers = {
+                new Philosopher("Philosopher 1", fork1, fork2),
+                new Philosopher("Philosopher 2", fork2, fork3),
+                new Philosopher("Philosopher 3", fork3, fork4),
+                new Philosopher("Philosopher 4", fork4, fork5),
+                new Philosopher("Philosopher 5", fork5, fork1)
+        };
+
+        for (Philosopher philosopher : philosophers) {
+            philosopher.start();
+        }
+
+        try {
+            for (Philosopher philosopher : philosophers) {
+                philosopher.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for (Philosopher philosopher : philosophers) {
+            System.out.println(philosopher.getName() + " ate " + philosopher.getEatCount() + " times.");
+        }
+    }
+}
