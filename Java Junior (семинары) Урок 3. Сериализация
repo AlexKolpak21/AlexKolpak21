@@ -1,0 +1,47 @@
+import java.io.*;
+
+class Student implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private int age;
+    private transient double GPA;  // transient указывает, что поле не должно участвовать в сериализации
+
+    public Student(String name, int age, double GPA) {
+        this.name = name;
+        this.age = age;
+        this.GPA = GPA;
+    }
+
+    public void printInfo() {
+        System.out.println("Name: " + name);
+        System.out.println("Age: " + age);
+        System.out.println("GPA: " + GPA);
+    }
+}
+
+public class SerializationExample {
+    public static void main(String[] args) {
+        // Создаем объект Student
+        Student student = new Student("John Doe", 20, 3.5);
+
+        // Сериализуем объект в файл
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("student.ser"))) {
+            outputStream.writeObject(student);
+            System.out.println("Объект успешно сериализован.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Десериализуем объект из файла
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("student.ser"))) {
+            Student deserializedStudent = (Student) inputStream.readObject();
+            System.out.println("Объект успешно десериализован.");
+
+            // Выводим информацию о десериализованном объекте
+            deserializedStudent.printInfo();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+}
