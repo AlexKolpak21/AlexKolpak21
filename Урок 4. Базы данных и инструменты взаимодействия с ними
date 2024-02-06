@@ -1,0 +1,171 @@
+Настройка базы данных (например, с использованием MySQL):
+sql
+Copy code
+CREATE DATABASE SchoolDB;
+USE SchoolDB;
+
+CREATE TABLE Courses (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255),
+    duration INT
+);
+Добавьте зависимости для Hibernate в файл pom.xml (если вы используете Maven):
+xml
+Copy code
+<dependencies>
+    <!-- Hibernate Core -->
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>5.6.4.Final</version>
+    </dependency>
+
+    <!-- Hibernate Entity Manager -->
+    <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-entitymanager</artifactId>
+        <version>5.6.4.Final</version>
+    </dependency>
+
+    <!-- Hibernate Validator -->
+    <dependency>
+        <groupId>org.hibernate.validator</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>7.0.2.Final</version>
+    </dependency>
+
+    <!-- MySQL Connector -->
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>8.0.27</version>
+    </dependency>
+</dependencies>
+Создайте класс Course, соответствующий таблице Courses, с аннотациями Hibernate:
+java
+Copy code
+import javax.persistence.*;
+
+@Entity
+@Table(name = "Courses")
+public class Course {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "duration")
+    private int duration;
+
+    // геттеры и сеттеры
+}
+Напишите код для взаимодействия с базой данных:
+java
+Copy code
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+
+public class Main {
+    private static final SessionFactory sessionFactory;
+
+    static {
+        try {
+            // Создание фабрики сессий Hibernate на основе файла конфигурации hibernate.cfg.xml
+            Configuration configuration = new Configuration().configure();
+            sessionFactory = configuration.buildSessionFactory();
+        } catch (Throwable ex) {
+            System.err.println("SessionFactory creation failed." + ex);
+            throw new ExceptionInInitializerError(ex);
+        }
+    }
+
+    public static void main(String[] args) {
+        // Вставка данных
+        insertCourse("Java Basics", 30);
+
+        // Чтение данных
+        Course course = readCourse(1);
+        System.out.println(course.getTitle());
+
+        // Обновление данных
+        updateCourseDuration(1, 40);
+
+        // Удаление данных
+        deleteCourse(1);
+
+        // Закрытие фабрики сессий Hibernate
+        sessionFactory.close();
+    }
+
+    private static void insertCourse(String title, int duration) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            Course course = new Course();
+            course.setTitle(title);
+            course.setDuration(duration);
+            session.save(course);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
+    }
+
+    private static Course readCourse(int id) {
+        Transaction transaction = null;
+        Course course = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            course = session.get(Course.class, id);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
+        return course;
+    }
+
+    private static void updateCourseDuration(int id, int duration) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            Course course = session.get(Course.class, id);
+            if (course != null) {
+                course.setDuration(duration);
+                session.update(course);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
+    }
+
+    private static void deleteCourse(int id) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+            Course course = session.get(Course.class, id);
+            if (course != null) {
+                session.delete(course);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
+    }
+}
