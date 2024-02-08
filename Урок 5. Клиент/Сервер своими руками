@@ -1,0 +1,84 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+
+public class ChatServer {
+    private static final int PORT = 5555;
+    private static Map<String, PrintWriter> clients = new HashMap<>();
+
+    public static void main(String[] args) {
+        try {
+            ServerSocket serverSocket = new ServerSocket(PORT);
+            System.out.println("Сервер запущен и ожидает подключений...");
+
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Подключился клиент: " + clientSocket);
+
+                Thread thread = new Thread(new ClientHandler(clientSocket));
+                thread.start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static class ClientHandler implements Runnable {
+        private Socket clientSocket;
+        private BufferedReader in;
+        private PrintWriter out;
+        private String username;
+
+        public ClientHandler(Socket socket) {
+            this.clientSocket = socket;
+        }
+
+        @Override
+        public void run() {
+            try {
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+                // Запрос имени пользователя
+                out.println("Введите ваше имя:");
+                username = in.readLine();
+                System.out.println("Подключился новый пользователь: " + username);
+                clients.put(username, out);
+
+                // Обработка сообщений от клиента
+                String message;
+                while ((message = in.readLine()) != null) {
+                    if (message.startsWith("@")) {
+                        String recipient = message.substring(1, message.indexOf(' '));
+                        String privateMessage = message.substring(message.indexOf(' ') + 1);
+                        if (clients.containsKey(recipient)) {
+                            clients.get(recipient).println("[Личное сообщение от " + username + "]: " + privateMessage);
+                        } else {
+                            out.println("Пользователь не в сети или не существует.");
+                        }
+                    } else {
+                        for (PrintWriter writer : clients.values()) {
+                            writer.println("[" + username + "]: " + message);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (username != null) {
+                    clients.remove(username);
+                }
+                try {
+                    clientSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
