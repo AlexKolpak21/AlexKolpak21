@@ -1,0 +1,75 @@
+Создайте новый проект Maven:
+bash
+Copy code
+mvn archetype:generate -DgroupId=com.example -DartifactId=myproject -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+Добавьте зависимости в файл pom.xml:
+xml
+Copy code
+<dependencies>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.12.0</version>
+    </dependency>
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.8.6</version>
+    </dependency>
+</dependencies>
+Создайте класс Person:
+java
+Copy code
+package com.example;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+public class Person {
+    private String firstName;
+    private String lastName;
+    private int age;
+
+    // Геттеры и сеттеры
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+}
+Напишите код для сериализации и десериализации объектов класса Person с использованием библиотеки Gson:
+java
+Copy code
+package com.example;
+
+import com.google.gson.Gson;
+
+public class Main {
+    public static void main(String[] args) {
+        Person person = new Person();
+        person.setFirstName("John");
+        person.setLastName("Doe");
+        person.setAge(30);
+
+        // Сериализация в JSON
+        Gson gson = new Gson();
+        String json = gson.toJson(person);
+        System.out.println("Сериализованный объект: " + json);
+
+        // Десериализация из JSON
+        Person deserializedPerson = gson.fromJson(json, Person.class);
+        System.out.println("Десериализованный объект: " + deserializedPerson);
+    }
+}
+Теперь вы можете запустить проект и убедиться, что сериализация и десериализация объектов класса Person в JSON работают корректно.
