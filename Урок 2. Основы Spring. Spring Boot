@@ -1,0 +1,54 @@
+Добавление метода удаления в UserRepository:
+java
+Copy code
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class UserRepository {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public void deleteById(int id) {
+        String sql = "DELETE FROM userTable WHERE id=?";
+        jdbcTemplate.update(sql, id);
+    }
+}
+Добавление метода удаления в UserService:
+java
+Copy code
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public void deleteById(int id) {
+        userRepository.deleteById(id);
+    }
+}
+Добавление метода удаления в UserController:
+java
+Copy code
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@Controller
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("user-delete/{id}")
+    public String deleteUser(@PathVariable("id") int id) {
+        userService.deleteById(id);
+        return "redirect:/users"; // После удаления перенаправляем на страницу со списком пользователей
+    }
+}
