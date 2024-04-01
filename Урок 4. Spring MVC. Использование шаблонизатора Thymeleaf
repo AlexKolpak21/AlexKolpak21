@@ -1,0 +1,65 @@
+1. Создание базового веб-приложения Spring MVC
+Сначала создайте проект Maven:
+
+Откройте IntelliJ IDEA и выберите "Create New Project".
+Выберите "Maven" в качестве типа проекта.
+Укажите координаты вашего проекта (GroupId, ArtifactId, Version) и нажмите "Next".
+Дайте имя проекту и выберите местоположение, затем нажмите "Next".
+Во вкладке "Archetype" выберите "maven-archetype-webapp" и нажмите "Next".
+Нажмите "Finish".
+После создания проекта добавьте зависимости Spring:
+
+<!-- pom.xml -->
+<dependencies>
+    <!-- Spring MVC -->
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-webmvc</artifactId>
+        <version>5.3.3</version>
+    </dependency>
+</dependencies>
+Теперь создайте контроллер:
+
+
+// HelloController.java
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class HelloController {
+
+    @RequestMapping("/")
+    @ResponseBody
+    public String hello() {
+        return "Привет, мир!";
+    }
+}
+2. Добавление Thymeleaf в проект
+Добавим зависимость Thymeleaf в pom.xml:
+
+<!-- pom.xml -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+Теперь создадим шаблон Thymeleaf:
+
+html
+Copy code
+<!-- src/main/resources/templates/welcome.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Welcome</title>
+</head>
+<body>
+    <p th:text="'Hello, ' + ${name} + '!'" />
+</body>
+</html>
+Измените контроллер для использования Thymeleaf:
+
+// HelloController.java
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
