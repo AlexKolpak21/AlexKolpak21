@@ -1,0 +1,20 @@
+def format_seconds(seconds):
+    days = seconds // (24 * 3600)
+    seconds %= (24 * 3600)
+    hours = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    return f'{days} days {hours} hours {minutes} minutes {seconds} seconds'
+
+def print_even_numbers():
+    even_numbers = [i for i in range(1, 11) if i % 2 == 0]
+    print(','.join(map(str, even_numbers)))
+
+# Пример использования функции для форматирования секунд
+seconds = 123456
+formatted_time = format_seconds(seconds)
+print(formatted_time)
+
+# Вывод только четных чисел от 1 до 10
+print_even_numbers()
