@@ -1,0 +1,288 @@
+
+package com.example.demo.aop;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface TrackUserAction {
+}
+Шаг 2: Реализация аспекта
+package com.example.demo.aop;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.stereotype.Component;
+
+@Aspect
+@Component
+public class UserActionAspect {
+
+    @Before("@annotation(com.example.demo.aop.TrackUserAction)")
+    public void logBefore(JoinPoint joinPoint) {
+        String methodName = joinPoint.getSignature().getName();
+        Object[] args = joinPoint.getArgs();
+        System.out.println("Вызов метода: " + methodName);
+        System.out.println("Параметры: ");
+        for (Object arg : args) {
+            System.out.println(arg);
+        }
+    }
+
+    @AfterReturning(pointcut = "@annotation(com.example.demo.aop.TrackUserAction)", returning = "result")
+    public void logAfterReturning(JoinPoint joinPoint, Object result) {
+        String methodName = joinPoint.getSignature().getName();
+        System.out.println("Метод завершен: " + methodName);
+        System.out.println("Результат: " + result);
+    }
+}
+Шаг 3: Применение аннотации @TrackUserAction к методам в сервисе
+package com.example.demo.service;
+
+import com.example.demo.aop.TrackUserAction;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ProductService {
+
+    @TrackUserAction
+    public String buyProduct(String productId, int quantity) {
+        // Логика покупки продукта
+        return "Product purchased: " + productId + ", quantity: " + quantity;
+    }
+
+    @TrackUserAction
+    public String reserveProduct(String productId, int quantity) {
+        // Логика резервирования продукта
+        return "Product reserved: " + productId + ", quantity: " + quantity;
+    }
+}
+Шаг 4: Тестирование
+package com.example.demo;
+
+import com.example.demo.service.ProductService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class DemoApplication implements CommandLineRunner {
+
+    @Autowired
+    private ProductService productService;
+
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        productService.buyProduct("123", 2);
+        productService.reserveProduct("123", 2);
+    }
+}
+WebApp - основной веб-приложение магазина.
+InventoryService - микросервис для резервирования товара на складе.
+PaymentService - микросервис для оплаты товара.
+Пример структуры проекта
+web-app
+├── src
+│   └── main
+│       └── java
+│           └── com
+│               └── example
+│                   └── webapp
+│                       ├── WebAppApplication.java
+│                       ├── controller
+│                       │   └── OrderController.java
+│                       └── service
+│                           └── OrderService.java
+inventory-service
+├── src
+│   └── main
+│       └── java
+│           └── com
+│               └── example
+│                   └── inventory
+│                       ├── InventoryServiceApplication.java
+│                       └── controller
+│                           └── InventoryController.java
+│                       └── service
+│                           └── InventoryService.java
+payment-service
+├── src
+│   └── main
+│       └── java
+│           └── com
+│               └── example
+│                   └── payment
+│                       ├── PaymentServiceApplication.java
+│                       └── controller
+│                           └── PaymentController.java
+│                       └── service
+│                           └── PaymentService.java
+Пример кода WebApp
+package com.example.webapp;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class WebAppApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(WebAppApplication.class, args);
+    }
+}
+OrderController.java
+java
+Копировать код
+package com.example.webapp.controller;
+
+import com.example.webapp.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class OrderController {
+
+    @Autowired
+    private OrderService orderService;
+
+    @PostMapping("/order")
+    public String placeOrder(@RequestParam String productId, @RequestParam int quantity) {
+        return orderService.placeOrder(productId, quantity);
+    }
+}
+OrderService.java
+java
+Копировать код
+package com.example.webapp.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+public class OrderService {
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Transactional
+    public String placeOrder(String productId, int quantity) {
+        String inventoryServiceUrl = "http://localhost:8081/reserve";
+        String paymentServiceUrl = "http://localhost:8082/pay";
+
+        restTemplate.postForObject(inventoryServiceUrl, null, String.class, productId, quantity);
+        restTemplate.postForObject(paymentServiceUrl, null, String.class, productId, quantity);
+
+        return "Order placed successfully for product: " + productId + ", quantity: " + quantity;
+    }
+}
+Пример кода InventoryService
+InventoryServiceApplication.java
+package com.example.inventory;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class InventoryServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(InventoryServiceApplication.class, args);
+    }
+}
+InventoryController.java
+java
+Копировать код
+package com.example.inventory.controller;
+
+import com.example.inventory.service.InventoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class InventoryController {
+
+    @Autowired
+    private InventoryService inventoryService;
+
+    @PostMapping("/reserve")
+    public String reserveProduct(@RequestParam String productId, @RequestParam int quantity) {
+        return inventoryService.reserveProduct(productId, quantity);
+    }
+}
+InventoryService.java
+package com.example.inventory.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class InventoryService {
+
+    @Transactional
+    public String reserveProduct(String productId, int quantity) {
+        // Логика резервирования продукта
+        return "Product reserved: " + productId + ", quantity: " + quantity;
+    }
+}
+Пример кода PaymentService
+PaymentServiceApplication.java
+package com.example.payment;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class PaymentServiceApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(PaymentServiceApplication.class, args);
+    }
+}
+PaymentController.java
+package com.example.payment.controller;
+
+import com.example.payment.service.PaymentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class PaymentController {
+
+    @Autowired
+    private PaymentService paymentService;
+
+    @PostMapping("/pay")
+    public String payForProduct(@RequestParam String productId, @RequestParam int quantity) {
+        return paymentService.payForProduct(productId, quantity);
+    }
+}
+PaymentService.java
+package com.example.payment.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class PaymentService {
+
+    @Transactional
+    public String payForProduct(String productId, int quantity) {
+        // Логика оплаты продукта
+        return "Payment successful for product: " + productId + ", quantity: " + quantity;
+    }
+}
