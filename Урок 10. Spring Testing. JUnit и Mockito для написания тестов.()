@@ -1,0 +1,56 @@
+Модульное тестирование
+my_project/
+├── src/
+│   ├── main/
+│   │   └── java/
+│   │       └── com/
+│   │           └── example/
+│   │               └── service/
+│   │                   └── MyService.java
+│   └── test/
+│       └── java/
+│           └── com/
+│               └── example/
+│                   └── service/
+│                       └── MyServiceTest.java
+├── build.gradle (или pom.xml)
+└── settings.gradle
+
+package com.example.service;
+
+public class MyService {
+    public int add(int a, int b) {
+        return a + b;
+    }
+
+    public int multiply(int a, int b) {
+        return a * b;
+    }
+}
+
+package com.example.service;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class MyServiceTest {
+    
+    private MyService myService = new MyService();
+
+    @Test
+    public void testAdd() {
+        assertEquals(3, myService.add(1, 2));
+        assertEquals(0, myService.add(-1, 1));
+    }
+
+    @Test
+    public void testMultiply() {
+        assertEquals(6, myService.multiply(2, 3));
+        assertEquals(-5, myService.multiply(-1, 5));
+    }
+}
+Запустите модульные тесты:
+Для Gradle:
+./gradlew test
+Для Maven:
+mvn test
