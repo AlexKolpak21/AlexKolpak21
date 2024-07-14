@@ -1,0 +1,130 @@
+#include <iostream>
+
+enum Color { RED, BLACK };
+
+struct Node {
+    int value;
+    Color color;
+    Node* left;
+    Node* right;
+    Node* parent;
+    
+    Node(int value) : value(value), color(RED), left(nullptr), right(nullptr), parent(nullptr) {}
+};
+
+class LeftLeaningRedBlackTree {
+private:
+    Node* root;
+    
+    Node* rotateLeft(Node* h) {
+        Node* x = h->right;
+        h->right = x->left;
+        if (x->left != nullptr) {
+            x->left->parent = h;
+        }
+        x->left = h;
+        x->color = h->color;
+        h->color = RED;
+        x->parent = h->parent;
+        h->parent = x;
+        return x;
+    }
+    
+    Node* rotateRight(Node* h) {
+        Node* x = h->left;
+        h->left = x->right;
+        if (x->right != nullptr) {
+            x->right->parent = h;
+        }
+        x->right = h;
+        x->color = h->color;
+        h->color = RED;
+        x->parent = h->parent;
+        h->parent = x;
+        return x;
+    }
+    
+    void flipColors(Node* h) {
+        h->color = RED;
+        h->left->color = BLACK;
+        h->right->color = BLACK;
+    }
+    
+    Node* insert(Node* h, int value) {
+        if (h == nullptr) {
+            return new Node(value);
+        }
+        
+        if (value < h->value) {
+            h->left = insert(h->left, value);
+            h->left->parent = h;
+        } else if (value > h->value) {
+            h->right = insert(h->right, value);
+            h->right->parent = h;
+        }
+        
+        if (isRed(h->right) && !isRed(h->left)) {
+            h = rotateLeft(h);
+        }
+        if (isRed(h->left) && isRed(h->left->left)) {
+            h = rotateRight(h);
+        }
+        if (isRed(h->left) && isRed(h->right)) {
+            flipColors(h);
+        }
+        
+        return h;
+    }
+    
+    bool isRed(Node* node) {
+        if (node == nullptr) {
+            return false;
+        }
+        return node->color == RED;
+    }
+    
+public:
+    LeftLeaningRedBlackTree() : root(nullptr) {}
+    
+    void insert(int value) {
+        root = insert(root, value);
+        root->color = BLACK;
+    }
+    
+    void printTree(Node* node, std::string indent, bool last) {
+        if (node != nullptr) {
+            std::cout << indent;
+            if (last) {
+                std::cout << "R----";
+                indent += "   ";
+            } else {
+                std::cout << "L----";
+                indent += "|  ";
+            }
+            std::string sColor = node->color == RED ? "RED" : "BLACK";
+            std::cout << node->value << "(" << sColor << ")" << std::endl;
+            printTree(node->left, indent, false);
+            printTree(node->right, indent, true);
+        }
+    }
+    
+    void printTree() {
+        if (root != nullptr) {
+            printTree(root, "", true);
+        }
+    }
+};
+
+// Пример использования
+int main() {
+    LeftLeaningRedBlackTree tree;
+    tree.insert(10);
+    tree.insert(20);
+    tree.insert(30);
+    tree.insert(15);
+    tree.insert(5);
+    
+    tree.printTree();
+    
+    return 0;
+}
