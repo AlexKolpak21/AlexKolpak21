@@ -1,0 +1,100 @@
+package ru.gb.example1_seminar12.controller;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.MessageChannels;
+import org.springframework.integration.file.FileWritingMessageHandler;
+import org.springframework.integration.file.dsl.Files;
+import org.springframework.integration.handler.LoggingHandler;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.integration.support.MessageBuilder;notation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import ru.gb.example1_seminar12.singleton.AppConfig;
+
+
+import java.io.File;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.web.bind.an
+
+@Configuration
+public class IntegrationConfig {
+
+    @Bean
+    public MessageChannel requestChannel() {
+        return new DirectChannel();
+    }
+
+    @Bean
+    public IntegrationFlow saveToFileFlow() {
+        return IntegrationFlows.from("requestChannel")
+                .handle(Files.outboundAdapter(new File("requests"))
+                        .fileNameGenerator(message -> "request-" + System.currentTimeMillis() + ".txt")
+                        .appendNewLine(true))
+                .get();
+    }
+
+    @Bean
+    @ServiceActivator(inputChannel = "requestChannel")
+    public MessageHandler fileWritingMessageHandler() {
+        FileWritingMessageHandler handler = new FileWritingMessageHandler(new File("requests"));
+        handler.setExpectReply(false);
+        handler.setFileNameGenerator(message -> "request-" + System.currentTimeMillis() + ".txt");
+        handler.setAppendNewLine(true);
+        return handler;
+    }
+}
+
+@RestController
+public class RequestController {
+
+    @Autowired
+    private MessageChannel requestChannel;
+
+    @PostMapping("/saveRequest")
+    public String saveRequest(@RequestBody String request) {
+        requestChannel.send(MessageBuilder.withPayload(request).build());
+        return "Request saved!";
+    }
+}
+public class AppConfig {
+
+    private static AppConfig instance;
+
+    private String someProperty;
+
+    private AppConfig() {
+        // Инициализация конфигурации
+        someProperty = "Default Property";
+    }
+
+    public static synchronized AppConfig getInstance() {
+        if (instance == null) {
+            instance = new AppConfig();
+        }
+        return instance;
+    }
+
+    public String getSomeProperty() {
+        return someProperty;
+    }
+
+    public void setSomeProperty(String someProperty) {
+        this.someProperty = someProperty;
+    }
+}
+
+@RestController
+public class ConfigController {
+
+    @GetMapping("/config")
+    public String getConfigProperty() {
+        AppConfig config = AppConfig.getInstance();
+        return "Current Property: " + config.getSomeProperty();
+    }
+}
