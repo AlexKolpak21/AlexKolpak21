@@ -1,0 +1,13 @@
+<dependencies>
+    <!-- Spring Boot -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-integration</artifactId>
+    </dependency>
+    <!-- File support for Spring Integration -->
+    <dependency>
+        <groupId>org.springframework.integration</groupId>
+        <artifactId>spring-integration-file</artifactId>
+    </dependency>
+    <!-- Другие зависимости вашего проекта -->
+</dependencies>
